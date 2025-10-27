@@ -1,26 +1,26 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'react-native': 'react-native-web',
-      'react-native-web/dist/apis/StyleSheet/registry': path.resolve(
+      "react-native": "react-native-web",
+      "react-native-web/dist/apis/StyleSheet/registry": path.resolve(
         __dirname,
-        'src/react-native-web-shim.js'
+        "src/react-native-web-shim.js"
       ),
     },
   },
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:7496',
+      "/api": {
+        target: process.env.VITE_API_BASE_URL || "http://localhost:7496",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },
-})
+});
