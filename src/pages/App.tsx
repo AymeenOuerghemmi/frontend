@@ -35,7 +35,7 @@ export default function App() {
                 className="text-center mb-12 z-10"
             >
                 <GradientText from="#7C3AED" to="#06B6D4" className="text-4xl md:text-5xl font-bold">
-                    InstaClinic Spa Médical
+                    Didon Clinic
                 </GradientText>
                 <p className="text-gray-600 mt-2 text-lg">
                     Votre espace bien-être, santé & beauté 💆‍♀️
@@ -105,7 +105,6 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2 }}
             >
-                Design médical moderne 💅 par <b>React Bits + Tailwind + Framer Motion</b>
             </motion.footer>
         </div>
     );
