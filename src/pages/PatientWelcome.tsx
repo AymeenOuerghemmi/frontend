@@ -22,7 +22,7 @@ export default function PatientWelcome() {
   // 🔹 Récupération des données patient
   useEffect(() => {
     if (nbsalle && idpatient) {
-      fetch(`/api/${nbsalle}/${idpatient}`)
+      fetch(`${import.meta.env.VITE_API_BASE_URL}/${nbsalle}/${idpatient}`)
         .then((r) => r.json())
         .then((res) => res.success && setData(res));
     }
