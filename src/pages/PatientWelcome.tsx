@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "../components/ui/GlassCard";
 import { GradientText } from "../components/ui/GradientText";
+import ServiceLoop from "../components/ServiceLoop";
 
 export default function PatientWelcome() {
   const { nbsalle, idpatient } = useParams();
@@ -18,6 +19,7 @@ export default function PatientWelcome() {
     "Nos experts s’occupent du reste 💜",
   ];
 
+  // 🔹 Récupération des données patient
   useEffect(() => {
     if (nbsalle && idpatient) {
       fetch(`/api/${nbsalle}/${idpatient}`)
@@ -26,19 +28,13 @@ export default function PatientWelcome() {
     }
   }, [nbsalle, idpatient]);
 
-  useEffect(() => {
-    if (nbsalle && idpatient) {
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/${nbsalle}/${idpatient}`)
-        .then((r) => r.json())
-        .then((res) => res.success && setData(res));
-    }
-  }, [nbsalle, idpatient]);
-
+  // 🔹 Heure en direct
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
+  // 🔹 Message défilant
   useEffect(() => {
     const interval = setInterval(
       () => setIndex((i) => (i + 1) % messages.length),
@@ -57,46 +53,35 @@ export default function PatientWelcome() {
   const { person } = data;
   const fullName = `${person.prenom} ${person.nom}`;
 
-  return (
-    <div className="relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman]">
-      {/* === NAVBAR === */}
-      <motion.header
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0 }}
-        className="fixed top-0 left-0 w-full flex items-center justify-between px-10 py-1 bg-black/90 backdrop-blur-md border-b border-white/10 z-30 shadow-md"
-      >
-        {/* === Logo à gauche === */}
-        <div className="flex items-center gap-3">
-          <img
-            src="/logo-Didon.png"
-            alt="Didon Clinic Logo"
-            className="w-16 h-16 object-contain drop-shadow-md"
-          />
-        </div>
+  // 🔹 Import automatique de toutes les images du dossier /public/images
+  const imageModules = import.meta.glob("/public/images/*.{jpg,jpeg,png,webp}");
+  const serviceImages = Object.keys(imageModules).map((path) => ({
+    src: path.replace("/public", ""), // Retire le /public du chemin
+    alt: path.split("/").pop()?.split(".")[0] || "service",
+  }));
 
-        {/* === Nom de la clinique centré === */}
-        <div className="flex flex-col items-center text-center leading-tight">
-          <h1 className="text-[#E5C89D] text-3xl md:text-4xl font-semibold tracking-wide uppercase drop-shadow-sm">
+  return (
+    <div className="relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-gradient-to-br from-[#f7ece0] to-[#f7ece0]">
+      {/* === HEADER === */}
+      <header className="fixed top-0 left-0 w-full flex items-center justify-between px-10 py-1 bg-black/90 backdrop-blur-md border-b border-white/10 z-30 shadow-md">
+        <img
+          src="/logo-Didon.png"
+          alt="Didon Clinic"
+          className="w-16 h-16 object-contain"
+        />
+        <div className="text-center leading-tight">
+          <h1 className="text-[#E5C89D] text-3xl md:text-4xl font-semibold uppercase drop-shadow-sm">
             DIDON CLINIC
           </h1>
-          <p className="text-[#E5C89D] text-sm md:text-base italic tracking-wider mt-1">
-            Bien-être • Santé • Laser • Esthétique • Greffe • Chirurgie
-          </p>
         </div>
-
-        {/* === Heure actuelle à droite === */}
-        <div className="text-[#E5C89D] text-lg font-medium tracking-wide text-right leading-tight">
-          {/* Heure actuelle */}
-          <div>
+        <div className="text-[#E5C89D] text-right leading-tight">
+          <div className="text-lg font-medium">
             {time.toLocaleTimeString("fr-FR", {
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
             })}
           </div>
-
-          {/* Date du jour */}
           <div className="text-sm text-[#d4b896]">
             {time.toLocaleDateString("fr-FR", {
               weekday: "long",
@@ -106,7 +91,7 @@ export default function PatientWelcome() {
             })}
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* === CONTENU PRINCIPAL === */}
       <div className="flex flex-col items-center justify-center flex-grow mt-24 w-full px-2">
@@ -136,7 +121,7 @@ export default function PatientWelcome() {
             </GradientText>
 
             <p className="text-[#50301aff] text-lg font-medium">
-              Salle n° {nbsalle}
+              Chambre n° {nbsalle}
             </p>
 
             {/* === Messages défilants === */}
@@ -146,8 +131,8 @@ export default function PatientWelcome() {
                   key={index}
                   initial={{ y: "100%", opacity: 0 }}
                   animate={{ y: "0%", opacity: 1 }}
-                  exit={{ y: "-100%", opacity: 0 }}
-                  transition={{ duration: 0 }}
+                  //exit={{ y: "-100%", opacity: 0 }}
+                  //transition={{ duration: 0.7 }}
                   className="absolute text-2xl md:text-3xl text-[#3E2E18] font-semibold drop-shadow-sm"
                 >
                   {messages[index]}
@@ -162,88 +147,26 @@ export default function PatientWelcome() {
             </p>
           </motion.div>
         </GlassCard>
-        {/* === DIVIDER ÉLÉGANT ENTRE LA CARTE ET LES SERVICES === */}
-        <div className="w-full py-3 flex items-center justify-center bg-gradient-to-b ">
+
+        {/* === DIVIDER === */}
+        <div className="w-full py-3 flex items-center justify-center bg-gradient-to-b from-transparent to-[#f8eee2]">
           <div className="flex items-center justify-center gap-4 w-full max-w-4xl px-4">
-            {/* Ligne gauche */}
             <div className="flex-1 h-[2px] bg-gradient-to-r from-transparent via-[#d4b896] to-transparent max-w-[400px]" />
-            {/* Étoile centrale (4 branches) */}
-            <div className="text-[#7a3016] text-xl">
-              <span className="inline-block">✦</span>
+            <div className="text-[#74280DFF] text-xl">
+              <p className="text-[#E7A542FF] text-sm md:text-base italic tracking-wider mt-1">
+                Chirurgie esthétique • Centre de Laser • Médecine esthétique •
+                Greffe Capillaire • Rééducation & Santé
+              </p>
             </div>
-            {/* Ligne droite */}
             <div className="flex-1 h-[2px] bg-gradient-to-l from-transparent via-[#d4b896] to-transparent max-w-[400px]" />
           </div>
         </div>
 
-        {/* === CARTES DES SERVICES === */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 mt-2 w-full max-w-9xl px-2 ">
-          {[
-            {
-              title: "Bien-être & Soins",
-              desc: "Un espace dédié à la détente et à l'harmonie : 3 salles de soins, un hammam traditionnel et des soins haut de gamme signés Clarins, pour une expérience unique de beauté et de relaxation.",
-              icon: "/icons/spa.png",
-              bg: "bg-[#f0dfc7]/15",
-            },
-            {
-              title: "Rééducation & Santé",
-              desc: "Nous vous accompagnons avec un programme nutritionnel et sportif adapté à vos besoins, alliant nutrition, suivi médicalisé et programme personnalisé.",
-              icon: "/icons/Rééducation.png",
-              bg: "bg-[#f0dfc7]/30",
-            },
-            {
-              title: "Centre de Laser",
-              desc: "Équipé des technologies les plus performantes pour toutes les carnations : épilation définitive, laser anti-tâches et vasculaire.",
-              icon: "/icons/laser.png",
-              bg: "bg-[#f0dfc7]/45",
-            },
-            {
-              title: "Médecine Esthétique",
-              desc: "Pôle dédié à la médecine esthétique : injections, soins de la peau et laser. Des médecins de référence et des technologies de pointe à votre service.",
-              icon: "/icons/docteur.png",
-              bg: "bg-[#f0dfc7]/60",
-            },
-            {
-              title: "Greffe Capillaire",
-              desc: "Pôle dédié à la greffe de cheveux, barbe et sourcils. Un accompagnement complet du diagnostic personnalisé au suivi post-opératoire.",
-              icon: "/icons/traitement-capillaire.png",
-              bg: "bg-[#f0dfc7]/75",
-            },
-            {
-              title: "Chirurgie Esthétique",
-              desc: "4 salles d'opération, 31 chambres et une équipe médicale dédiée à votre confort et à votre sécurité.",
-              icon: "/icons/chirurgie.png",
-              bg: "bg-[#f0dfc7]/90",
-            },
-          ].map((srv, i) => (
-            <motion.div
-              key={i}
-              transition={{ type: "spring", stiffness: 200 }}
-              className={`p-6 rounded-2xl ${srv.bg} backdrop-blur-md shadow-lg border border-[#C7A36A]/40 text-center hover:shadow-2xl`}
-            >
-              {/* === Affichage conditionnel de l’icône === */}
-              <div className="flex justify-center mb-3">
-                {srv.icon.startsWith("/") ? (
-                  <img
-                    src={srv.icon}
-                    alt={srv.title}
-                    className="w-12 h-12 object-contain"
-                  />
-                ) : (
-                  <span className="text-4xl">{srv.icon}</span>
-                )}
-              </div>
-
-              <h3 className="text-[#8b4513] font-semibold text-xl mb-2 font-[Times_New_Roman]">
-                {srv.title}
-              </h3>
-              <p className="text-gray-900 text-sm leading-relaxed font-[Times_New_Roman]">
-                {srv.desc}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+        {/* === BOUCLE D’IMAGES DE SERVICES === */}
+        <ServiceLoop images={serviceImages} speed={40} />
       </div>
+
+      {/* === FOOTER === */}
       <footer className="w-full py-3 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-3 text-center mt-10">
         <img
           src="https://softsys.com.tn/wp-content/uploads/2018/02/LOGOSOFTSYS.png"
