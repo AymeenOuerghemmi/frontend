@@ -37,7 +37,7 @@ export default function ServiceLoop({ images, speed = 40 }: ServiceLoopProps) {
     return (
         <div
             ref={containerRef}
-            className="relative w-full overflow-hidden py-8 bg-gradient-to-b from-[#f7ece0] to-[#f7ece0]"
+            className="relative w-full overflow-hidden py-8 bg-gradient-to-b from-[#f9f7f3] to-[#f9f7f3]"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
