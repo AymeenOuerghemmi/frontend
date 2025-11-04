@@ -1,32 +1,42 @@
-import axios from "axios";
+import OpenAI from "openai";
 
-const API_URL = "https://api.openai.com/v1/chat/completions";
-
-const API_KEY = "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";
-
+// Instanciez OpenAI côté serveur, jamais côté navigateur
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+   apiKey: "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",
+  dangerouslyAllowBrowser: true
+});
 
 /**
- * Traduit plusieurs textes en une seule requête GPT-4o-mini.
+ * Nettoie le JSON renvoyé par GPT (supprime ```json ... ``` ou backticks)
+ */
+function cleanJSONFromGPT(content: string): string {
+  return content
+    .replace(/```json\s*/g, "")
+    .replace(/```/g, "")
+    .replace(/`/g, "")
+    .trim();
+}
+
+/**
+ * Traduit plusieurs textes en une seule requête GPT-OSS-20B.
  * Conserve la structure JSON d’origine.
  */
 export async function translateTextGroup(
-    texts: Record<string, string>,
-    targetLang: string
+  texts: Record<string, string>,
+  targetLang: string
 ) {
-    console.log(` Envoi unique vers GPT-4o (${targetLang.toUpperCase()}) :`, texts);
+  console.log(`Envoi unique vers GPT-OSS-20B (${targetLang.toUpperCase()}) :`, texts);
 
-    try {
-        const jsonToTranslate = JSON.stringify(texts, null, 2);
+  try {
+    const jsonToTranslate = JSON.stringify(texts, null, 2);
 
-        const res = await axios.post(
-            API_URL,
-            {
-                model: "gpt-4o-mini",
-                messages: [
-
-                    {
-                        role: "system",
-                        content: `
+    const completion = await openai.chat.completions.create({
+      model: "openai/gpt-oss-20b:free",
+      messages: [
+        {
+          role: "system",
+          content: `
 You are a professional translator. 
 Translate only the **values** of the provided JSON into the requested language, keeping the **keys and JSON structure** exactly identical.
 
@@ -35,32 +45,31 @@ Translate only the **values** of the provided JSON into the requested language, 
 - Do not use "عيادة".
 - Preserve emojis and punctuation.
 - Keep the JSON format valid.
-`,
-                    },
+          `,
+        },
+        {
+          role: "user",
+          content: `Translate this JSON to ${targetLang.toUpperCase()}:\n${jsonToTranslate}`,
+        },
+      ],
+      temperature: 0.2,
+      max_tokens: 1500,
+    });
 
-                    {
-                        role: "user",
-                        content: `Translate this JSON to ${targetLang.toUpperCase()}:\n${jsonToTranslate}`,
-                    },
-                ],
-                temperature: 0.2,
-                max_tokens: 800,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+    const rawContent = completion.choices[0].message?.content || "";
+    const cleanedContent = cleanJSONFromGPT(rawContent);
 
-        const content = res.data.choices[0].message.content.trim();
-        const parsed = JSON.parse(content);
-        console.log(" Réponse GPT-4o groupée :", parsed);
-
-        return parsed;
-    } catch (err: any) {
-        console.error(" Erreur OpenAI (grouped):", err.response?.data || err.message);
-        return texts;
+    let parsed: Record<string, string> = texts;
+    try {
+      parsed = JSON.parse(cleanedContent);
+    } catch (e) {
+      console.warn("Impossible de parser le JSON GPT, retour original :", e);
     }
+
+    console.log("Réponse GPT-OSS-20B groupée :", parsed);
+    return parsed;
+  } catch (err: any) {
+    console.error("Erreur GPT-OSS-20B (grouped):", err.response?.data || err.message);
+    return texts;
+  }
 }
