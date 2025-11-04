@@ -31,12 +31,26 @@ export default function PatientWelcome() {
 
 
   // --- Initialisation ---
-  useEffect(() => {
-    if (nbsalle && idpatient) {
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/${nbsalle}/${idpatient}`)
-        .then((r) => r.json())
-        .then((res) => res.success && setData(res));
+  const loadData = async () => {
+    if (!nbsalle || !idpatient) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/${nbsalle}/${idpatient}`);
+      const json = await res.json();
+      const prev = lastDataRef.current;
+      const hasChanged = JSON.stringify(json) !== JSON.stringify(prev);
+      if (hasChanged) {
+        setData(json);
+        lastDataRef.current = json;
+      }
+    } catch (err) {
+      console.error("Erreur API:", err);
     }
+  };
+
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 15000);
+    return () => clearInterval(interval);
   }, [nbsalle, idpatient]);
 
   // --- Horloge ---
