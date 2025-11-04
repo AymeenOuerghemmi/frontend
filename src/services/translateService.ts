@@ -3,7 +3,7 @@ import OpenAI from "openai";
 // Instanciez OpenAI côté serveur, jamais côté navigateur
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-   apiKey: "",
+   apiKey: "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",
   dangerouslyAllowBrowser: true
 });
 
