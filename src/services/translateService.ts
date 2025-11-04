@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "https://api.openai.com/v1/chat/completions";
 
-const API_KEY = "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";
+const API_KEY = "fake_key";
 
 
 /**
