@@ -102,12 +102,29 @@ export default function PatientWelcome() {
 
   // --- Images fixes
   const serviceImages = [
-    { src: "./images/2-technique-botox-1.jpg", alt: "Bien-être & Soins" },
-    { src: "./images/1617917820-8ff0e3a4-e410-4de1-bede-f6b9f0765d60-1024x615.jpg", alt: "Rééducation & Santé" },
-    { src: "./images/C1_5035.jpg", alt: "Centre de Laser" },
-    { src: "./images/Capture d’écran 2025-09-29 à 14.37.32.png", alt: "Greffe Capillaire" },
-    { src: "./images/liposuccion-vaser.jpg", alt: "Chirurgie Esthétique" },
-    { src: "./images/La-Luminotherapie-LED-Medisol.jpg", alt: "LED Thérapie" },
+    { src: "/images/2-technique-botox-1.jpg", alt: "Bien-être & Soins", url: "https://www.clinique-didon.com/content/botox" },
+    { src: "/images/1617917820-8ff0e3a4-e410-4de1-bede-f6b9f0765d60-1024x615.jpg", alt: "Rééducation & Santé", url: "https://www.clinique-didon.com/content/hydrafacial" },
+    { src: "/images/C1_5035.jpg", alt: "Centre de Laser", url: "https://www.clinique-didon.com/content/morpheus8" },
+    { src: "/images/Capture d’écran 2025-09-29 à 14.37.32.png", alt: "Greffe Capillaire", url: "https://www.clinique-didon.com/content/reduction-mammaire" },
+    { src: "/images/Capture d’écran 2025-09-29 à 15.24.22.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-mammaire" },
+    { src: "/images/Capture d’écran 2025-09-29 à 16.30.48.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-cervico-facial" },
+    { src: "/images/Capture d’écran 2025-09-29 à 17.27.15.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/blepharoplastie" },
+    { src: "/images/Capture d’écran 2025-10-01 à 18.07.22.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/reeducation" },
+    { src: "/images/Capture d’écran 2025-10-01 à 18.29.29.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/complements-de-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/image (8).png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/jeune-couple-se-detendre-pendant-le-massage-du-dos-au-spa-de-sante-l-accent-est-mis-sur-la-jeune-femme.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/jeune-femme-se-detendre-dans-le-salon-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/jolie-femme-africaine-beneficiant-d-un-massage-du-visage-dans-le-salon-spa.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/La-Luminotherapie-LED-Medisol.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/led-therapie" },
+    { src: "/images/lipo_1.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/amincissement" },
+    { src: "/images/liposuccion-vaser.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/liposuccion" },
+    { src: "/images/male-adulte-faisant-une-extraction-d-unite-folliculaire.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/greffe-de-cheveux" },
+    { src: "/images/maquillage-permanent-pour-sourcils-gros-plan-belle-femme-aux-sourcils-epais-dans-salon-beaute_358354-9083.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/greffe-des-sourcils" },
+    { src: "/images/medecin-orl-touche-nez.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/rhinoplastie" },
+    { src: "/images/peeling-dr-pecorelli-chirurgie-plastique-et-medecine-esthetique-paris.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/peeling" },
+    { src: "/images/silhouette-de-femme-en-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/Site Web (1).png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
   ];
 
   if (!data)
@@ -129,7 +146,7 @@ export default function PatientWelcome() {
     >
       {/* HEADER */}
       <header className="fixed top-0 left-0 w-full flex items-center justify-between px-10 py-1 bg-black/90 backdrop-blur-md border-b border-white/10 z-30 shadow-md">
-        <img src="./logo-Didon.png" alt="Didon Clinic" className="w-16 h-16 object-contain" />
+        <img src="/logo-Didon.png" alt="Didon Clinic" className="w-16 h-16 object-contain" />
         <div className="text-center leading-tight">
           <h1 className="text-[#E5C89D] text-3xl md:text-4xl font-semibold uppercase drop-shadow-sm">
             {translatedTexts.clinicName || baseTexts.clinicName}
@@ -170,7 +187,7 @@ export default function PatientWelcome() {
           <div
             className="absolute inset-0 rounded-3xl"
             style={{
-              backgroundImage: `url('./didon-background.png')`,
+              backgroundImage: `url('/didon-background.png')`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
