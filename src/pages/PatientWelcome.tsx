@@ -1,36 +1,29 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "../components/ui/GlassCard";
 import { GradientText } from "../components/ui/GradientText";
 import ServiceLoop from "../components/ServiceLoop";
 import { translateTextGroup } from "../services/translateService";
 
 export default function PatientWelcome() {
-  const { nbsalle: routeSalle } = useParams();
-  const [searchParams] = useSearchParams();
-  const nbsalleParam = routeSalle ?? searchParams.get("nbsalle");
   const { nbsalle, idpatient } = useParams();
-
   const [data, setData] = useState<any>(null);
+  const [index, setIndex] = useState(0);
   const [time, setTime] = useState(new Date());
-  const [error, setError] = useState<string | null>(null);
-  const [isGeneralWelcome, setIsGeneralWelcome] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState<"fr" | "en" | "ar">("fr");
+  const [translatedTexts, setTranslatedTexts] = useState<Record<string, any>>({});
   const lastDataRef = useRef<any>(null);
 
-  const [lang, setLang] = useState<"fr" | "en" | "ar">("fr");
-  const [translatedTexts, setTranslatedTexts] = useState<Record<string, string>>({});
-
   const messages = [
+    "Bienvenue à Didon Clinic 🌸",
     "Votre bien-être est notre priorité 💆‍♀️",
     "Respirez... Détendez-vous 🕊️",
     "Un instant pour vous, rien que pour vous ✨",
     "Nos experts s’occupent du reste 💜",
   ];
 
-
-
-  // --- Initialisation ---
+  // --- Récupération des données patient
   const loadData = async () => {
     if (!nbsalle || !idpatient) return;
     try {
@@ -53,28 +46,31 @@ export default function PatientWelcome() {
     return () => clearInterval(interval);
   }, [nbsalle, idpatient]);
 
-  // --- Horloge ---
+  // --- Horloge
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // --- Textes à traduire ---
+  // --- Défilement messages
+  useEffect(() => {
+    const interval = setInterval(() => setIndex((i) => (i + 1) % messages.length), 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // --- Textes à traduire
+  const person = data?.person || {};
   const baseTexts = {
     clinicName: "DIDON CLINIC",
-    welcomeText:
-      !data?.success || data?.isDischarged
-        ? "Bienvenue dans votre espace de soins 🌿"
-        : `Bienvenue ${data?.person ? `${data.person.prenom} ${data.person.nom}` : ""}`,
-    subText:
-      !data?.success || data?.isDischarged
-        ? "Profitez de nos services et prenez soin de vous 🌸"
-        : `Chambre n° ${data?.chambre || nbsalleParam}`,
-    description:
-      !data?.success || data?.isDischarged
-        ? "Merci de votre confiance. Prenez soin de vous et à bientôt 🌸"
-        : "Nous vous offrons une expérience unique, combinant soins médicaux et détente.",
-    baseline: "Chirurgie esthétique • Centre de Laser • Médecine esthétique • Greffe Capillaire • Rééducation & Santé",
+    welcomeText: data?.success
+      ? `Bienvenue ${person?.prenom || ""} ${person?.nom || ""}`
+      : "Bienvenue à Didon Clinic 🌸",
+    subText: data?.success ? `Chambre n° ${nbsalle}` : "Bienvenue dans votre espace de soins 🌿",
+    description: data?.success
+      ? "Nous vous offrons une expérience unique, combinant soins médicaux et détente."
+      : "Merci de votre confiance. Prenez soin de vous et à bientôt 🌸",
+    baseline:
+      "Chirurgie esthétique • Centre de Laser • Médecine esthétique • Greffe Capillaire • Rééducation & Santé",
     dateText: time.toLocaleDateString("fr-FR", {
       weekday: "long",
       day: "2-digit",
@@ -84,64 +80,37 @@ export default function PatientWelcome() {
     messages: messages.join(" || "),
   };
 
-  // --- Traduction groupée GPT-4o ---
+  // --- Traduction GPT groupée
   useEffect(() => {
     const translateAll = async () => {
       if (lang === "fr") {
         setTranslatedTexts(baseTexts);
         return;
       }
-      console.log(` Traduction unique vers ${lang.toUpperCase()}...`);
       try {
         const result = await translateTextGroup(baseTexts, lang);
         if (result.messages)
           result.messages = result.messages.split(" || ").map((m: string) => m.trim());
         setTranslatedTexts(result);
-      } catch (error) {
-        console.error(" Erreur traduction groupée:", error);
+      } catch (e) {
+        console.error("Erreur traduction:", e);
         setTranslatedTexts(baseTexts);
       }
     };
     translateAll();
   }, [lang, data]);
 
-  // --- Images Services ---
+  // --- Images fixes
   const serviceImages = [
-    { src: "./images/2-technique-botox-1.jpg", alt: "Bien-être & Soins", url: "https://www.clinique-didon.com/content/botox" },
-    { src: "./images/1617917820-8ff0e3a4-e410-4de1-bede-f6b9f0765d60-1024x615.jpg", alt: "Rééducation & Santé", url: "https://www.clinique-didon.com/content/hydrafacial" },
-    { src: "./images/C1_5035.jpg", alt: "Centre de Laser", url: "https://www.clinique-didon.com/content/morpheus8" },
-    { src: "./images/Capture d’écran 2025-09-29 à 14.37.32.png", alt: "Greffe Capillaire", url: "https://www.clinique-didon.com/content/reduction-mammaire" },
-    { src: "./images/Capture d’écran 2025-09-29 à 15.24.22.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-mammaire" },
-    { src: "./images/Capture d’écran 2025-09-29 à 16.30.48.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-cervico-facial" },
-    { src: "./images/Capture d’écran 2025-09-29 à 17.27.15.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/blepharoplastie" },
-    { src: "./images/Capture d’écran 2025-10-01 à 18.07.22.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/reeducation" },
-    { src: "./images/Capture d’écran 2025-10-01 à 18.29.29.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/complements-de-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/image (8).png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/jeune-couple-se-detendre-pendant-le-massage-du-dos-au-spa-de-sante-l-accent-est-mis-sur-la-jeune-femme.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/jeune-femme-se-detendre-dans-le-salon-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/jolie-femme-africaine-beneficiant-d-un-massage-du-visage-dans-le-salon-spa.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/La-Luminotherapie-LED-Medisol.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/led-therapie" },
-    { src: "./images/lipo_1.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/amincissement" },
-    { src: "./images/liposuccion-vaser.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/liposuccion" },
-    { src: "./images/male-adulte-faisant-une-extraction-d-unite-folliculaire.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/greffe-de-cheveux" },
-    { src: "./images/maquillage-permanent-pour-sourcils-gros-plan-belle-femme-aux-sourcils-epais-dans-salon-beaute_358354-9083.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/greffe-des-sourcils" },
-    { src: "./images/medecin-orl-touche-nez.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/rhinoplastie" },
-    { src: "./images/peeling-dr-pecorelli-chirurgie-plastique-et-medecine-esthetique-paris.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/peeling" },
-    { src: "./images/silhouette-de-femme-en-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "./images/Site Web (1).png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "./images/2-technique-botox-1.jpg", alt: "Bien-être & Soins" },
+    { src: "./images/1617917820-8ff0e3a4-e410-4de1-bede-f6b9f0765d60-1024x615.jpg", alt: "Rééducation & Santé" },
+    { src: "./images/C1_5035.jpg", alt: "Centre de Laser" },
+    { src: "./images/Capture d’écran 2025-09-29 à 14.37.32.png", alt: "Greffe Capillaire" },
+    { src: "./images/liposuccion-vaser.jpg", alt: "Chirurgie Esthétique" },
+    { src: "./images/La-Luminotherapie-LED-Medisol.jpg", alt: "LED Thérapie" },
   ];
 
-  // --- Rendu principal ---
-  if (error)
-    return (
-      <div className="h-screen flex flex-col items-center justify-center text-gray-700 text-lg text-center px-4">
-        ⚠️ {error}
-        <p className="mt-2 text-sm text-gray-500">Vérifiez la connexion au serveur.</p>
-      </div>
-    );
-
-  if (loading)
+  if (!data)
     return (
       <div className="h-screen flex items-center justify-center text-gray-500 text-lg font-[Times_New_Roman]">
         Chargement...
@@ -167,22 +136,17 @@ export default function PatientWelcome() {
           </h1>
         </div>
 
-        {/* Bloc droit (heure + langues) */}
+        {/* Heure + langues */}
         <div className="flex items-center gap-3 text-[#E5C89D]">
-          {/* Heure et date */}
           <div className="text-right leading-tight">
             <div className="text-sm font-medium">
-              {time.toLocaleTimeString("fr-FR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {time.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
             </div>
             <div className="text-xs text-[#d4b896]">
               {translatedTexts.dateText || baseTexts.dateText}
             </div>
           </div>
 
-          {/* Sélecteur langue compact */}
           <div className="flex items-center gap-1 bg-black/40 border border-[#E5C89D]/40 rounded-full px-1 py-[2px]">
             {["fr", "en", "ar"].map((lng) => (
               <button
@@ -200,7 +164,6 @@ export default function PatientWelcome() {
         </div>
       </header>
 
-
       {/* CONTENU */}
       <div className="flex flex-col items-center justify-center flex-grow mt-24 w-full px-2">
         <GlassCard className="relative z-10 p-10 md:p-9 w-[95%] max-w-7xl shadow-2xl rounded-3xl border border-white/40 overflow-hidden">
@@ -213,22 +176,36 @@ export default function PatientWelcome() {
             }}
           />
           <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-3xl" />
-          <div className="relative z-10 text-center space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="relative z-10 text-center space-y-6"
+          >
             <GradientText from="#50301aff" to="#8b4513" className="text-4xl md:text-5xl font-bold">
               {translatedTexts.welcomeText || baseTexts.welcomeText}
             </GradientText>
             <p className="text-[#50301aff] text-lg font-medium">
               {translatedTexts.subText || baseTexts.subText}
             </p>
-            <div className="relative mt-10 mb-6 h-16 flex justify-center items-center">
-              <div className="text-2xl md:text-3xl text-[#3E2E18] font-semibold drop-shadow-sm">
-                {msgs[Math.floor((Date.now() / 4000) % msgs.length)]}
-              </div>
+
+            <div className="overflow-hidden relative mt-10 mb-6 h-16 flex justify-center items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={index}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  className="absolute text-2xl md:text-3xl text-[#3E2E18] font-semibold drop-shadow-sm"
+                >
+                  {msgs[index]}
+                </motion.div>
+              </AnimatePresence>
             </div>
+
             <p className="text-[#4b281b] leading-relaxed max-w-2xl mx-auto mt-6 text-base">
               {translatedTexts.description || baseTexts.description}
             </p>
-          </div>
+          </motion.div>
         </GlassCard>
 
         <div className="w-full py-3 flex items-center justify-center">
@@ -245,7 +222,7 @@ export default function PatientWelcome() {
       </div>
 
       {/* FOOTER */}
-      <footer className="w-full py-3 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-3 text-center">
+      <footer className="w-full py-3 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-3 text-center mt-10">
         <img
           src="https://softsys.com.tn/wp-content/uploads/2018/02/LOGOSOFTSYS.png"
           alt="Softsys Logo"
