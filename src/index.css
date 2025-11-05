@@ -2,5 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-html,body,#root{height:100%;}
-body{background:linear-gradient(135deg,#f5f3ff,#ecfeff);font-family:'Times New Roman',Times, serif;}
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  zoom: 80%;
+  background: linear-gradient(135deg, #f5f3ff, #ecfeff);
+  font-family: 'Times New Roman', Times, serif;
+}
