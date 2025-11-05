@@ -37,14 +37,16 @@ export async function translateTextGroup(
         {
           role: "system",
           content: `
-You are a professional translator. 
-Translate only the **values** of the provided JSON into the requested language, keeping the **keys and JSON structure** exactly identical.
+You are a professional translator.
 
-⚠️ Special rule for Arabic (ar):
-- Always translate the English or French word "clinic didon" or "Clinique" as "مصحة ديدون".
+Translate only the values of the JSON.
+DO NOT translate proper names or personal names (prenom/nom/patientName).
+Keep the JSON structure and keys unchanged.
+
+For Arabic (ar):
+- Translate "clinic didon" or "Clinique" as "مصحة ديدون"
 - Do not use "عيادة".
-- Preserve emojis and punctuation.
-- Keep the JSON format valid.
+- Keep emojis.
           `,
         },
         {
