@@ -52,7 +52,7 @@ export default function PatientWelcome() {
     return () => clearInterval(timer);
   }, []);
 
-  // --- Défilement messages
+  // --- Défilement des messages
   useEffect(() => {
     const interval = setInterval(() => setIndex((i) => (i + 1) % messages.length), 4000);
     return () => clearInterval(interval);
@@ -60,10 +60,12 @@ export default function PatientWelcome() {
 
   // --- Textes à traduire
   const person = data?.person || {};
+  const rawPatientName = (data?.success ? `${person?.prenom || ""} ${person?.nom || ""}` : "").trim();
+
   const baseTexts = {
     clinicName: "DIDON CLINIC",
-    welcomeTitle: "Bienvenue", // traduit !
-    patientName: data?.success ? `${person?.prenom || ""} ${person?.nom || ""}`.trim() : "",
+    welcomeTitle: "Bienvenue",
+    patientName: rawPatientName,
     subText: data?.success ? `Chambre n° ${nbsalle}` : "Bienvenue dans votre espace de soins 🌿",
     description: data?.success
       ? "Nous vous offrons une expérience unique, combinant soins médicaux et détente."
@@ -99,8 +101,18 @@ export default function PatientWelcome() {
     translateAll();
   }, [lang, data]);
 
+  // --- Sécurité : si la traduction du nom arabe reste en latin → garder original
+  const looksLatin = (s: string) => /^[\u0000-\u00ff\s'.-]+$/.test(s);
+  const finalPatientName =
+    lang === "ar" && looksLatin(translatedTexts.patientName)
+      ? baseTexts.patientName
+      : (translatedTexts.patientName || baseTexts.patientName);
+
+  // --- Construction du titre final
+  const welcomeText = `${translatedTexts.welcomeTitle || baseTexts.welcomeTitle} ${finalPatientName}`.trim();
+
   // --- Images fixes
-  const serviceImages = [
+   const serviceImages = [
     { src: "/images/2-technique-botox-1.jpg", alt: "Bien-être & Soins", url: "https://www.clinique-didon.com/content/botox" },
     { src: "/images/1617917820-8ff0e3a4-e410-4de1-bede-f6b9f0765d60-1024x615.jpg", alt: "Rééducation & Santé", url: "https://www.clinique-didon.com/content/hydrafacial" },
     { src: "/images/C1_5035.jpg", alt: "Centre de Laser", url: "https://www.clinique-didon.com/content/morpheus8" },
@@ -140,8 +152,9 @@ export default function PatientWelcome() {
 
   return (
     <div
-      className={`relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-[#f9f7f3] ${lang === "ar" ? "direction-rtl text-right" : ""
-        }`}
+      className={`relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-[#f9f7f3] ${
+        lang === "ar" ? "direction-rtl text-right" : ""
+      }`}
     >
       {/* HEADER */}
       <header className="fixed top-0 left-0 w-full flex items-center justify-between px-10 py-1 bg-black/90 backdrop-blur-md border-b border-white/10 z-30 shadow-md">
@@ -168,10 +181,11 @@ export default function PatientWelcome() {
               <button
                 key={lng}
                 onClick={() => setLang(lng as any)}
-                className={`w-7 h-7 flex items-center justify-center text-[10px] font-bold rounded-full transition-all ${lang === lng
-                  ? "bg-[#E5C89D] text-black shadow-sm"
-                  : "text-[#E5C89D] hover:bg-[#E5C89D]/30"
-                  }`}
+                className={`w-7 h-7 flex items-center justify-center text-[10px] font-bold rounded-full transition-all ${
+                  lang === lng
+                    ? "bg-[#E5C89D] text-black shadow-sm"
+                    : "text-[#E5C89D] hover:bg-[#E5C89D]/30"
+                }`}
               >
                 {lng.toUpperCase()}
               </button>
@@ -183,23 +197,9 @@ export default function PatientWelcome() {
       {/* CONTENU */}
       <div className="flex flex-col items-center justify-center flex-grow mt-24 w-full px-2">
         <GlassCard className="relative z-10 p-10 md:p-9 w-[95%] max-w-7xl shadow-2xl rounded-3xl border border-white/40 overflow-hidden">
-          <div
-            className="absolute inset-0 rounded-3xl"
-            style={{
-              backgroundImage: `url('/didon-background.png')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-3xl" />
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="relative z-10 text-center space-y-6"
-          >
+          <motion.div className="relative z-10 text-center space-y-6">
             <GradientText from="#50301aff" to="#8b4513" className="text-4xl md:text-5xl font-bold">
-              {`${translatedTexts.welcomeTitle || baseTexts.welcomeTitle} ${baseTexts.patientName}`}
+              {welcomeText}
             </GradientText>
 
             <p className="text-[#50301aff] text-lg font-medium">
