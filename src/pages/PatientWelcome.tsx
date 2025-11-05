@@ -62,9 +62,8 @@ export default function PatientWelcome() {
   const person = data?.person || {};
   const baseTexts = {
     clinicName: "DIDON CLINIC",
-    welcomeText: data?.success
-      ? `Bienvenue ${person?.prenom || ""} ${person?.nom || ""}`
-      : "Bienvenue à Didon Clinic 🌸",
+    welcomeTitle: "Bienvenue", // traduit !
+    patientName: data?.success ? `${person?.prenom || ""} ${person?.nom || ""}`.trim() : "",
     subText: data?.success ? `Chambre n° ${nbsalle}` : "Bienvenue dans votre espace de soins 🌿",
     description: data?.success
       ? "Nous vous offrons une expérience unique, combinant soins médicaux et détente."
@@ -200,8 +199,9 @@ export default function PatientWelcome() {
             className="relative z-10 text-center space-y-6"
           >
             <GradientText from="#50301aff" to="#8b4513" className="text-4xl md:text-5xl font-bold">
-              {translatedTexts.welcomeText || baseTexts.welcomeText}
+              {`${translatedTexts.welcomeTitle || baseTexts.welcomeTitle} ${baseTexts.patientName}`}
             </GradientText>
+
             <p className="text-[#50301aff] text-lg font-medium">
               {translatedTexts.subText || baseTexts.subText}
             </p>
