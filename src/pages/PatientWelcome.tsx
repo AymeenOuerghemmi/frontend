@@ -197,7 +197,21 @@ export default function PatientWelcome() {
       {/* CONTENU */}
       <div className="flex flex-col items-center justify-center flex-grow mt-24 w-full px-2">
         <GlassCard className="relative z-10 p-10 md:p-9 w-[95%] max-w-7xl shadow-2xl rounded-3xl border border-white/40 overflow-hidden">
-          <motion.div className="relative z-10 text-center space-y-6">
+         <div
+            className="absolute inset-0 rounded-3xl"
+            style={{
+              backgroundImage: `url('/didon-background.png')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-3xl" />
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="relative z-10 text-center space-y-6"
+          >
             <GradientText from="#50301aff" to="#8b4513" className="text-4xl md:text-5xl font-bold">
               {welcomeText}
             </GradientText>
