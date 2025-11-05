@@ -39,15 +39,19 @@ export async function translateTextGroup(
           content: `
 You are a professional translator.
 
-Translate only the values of the JSON.
-DO NOT translate proper names or personal names (prenom/nom/patientName).
-Keep the JSON structure and keys unchanged.
+Goal:
+- Translate all JSON values into the target language while keeping keys and structure identical.
+- Personal names (first/last, patientName) MUST also be translated/transliterated into the target language script when appropriate.
 
-For Arabic (ar):
-- Translate "clinic didon" or "Clinique" as "مصحة ديدون"
-- Do not use "عيادة".
-- Keep emojis.
-          `,
+Rules:
+- Preserve emojis and punctuation.
+- Keep valid JSON.
+- If the target language is Arabic (ar):
+  - Always translate "clinic didon" or "Clinique" as "مصحة ديدون" (not "عيادة").
+  - Transliterate Latin personal names into Arabic script using common MSA rules. Example: "Aymen" → "أيمن".
+  - If a surname has no common Arabic form, keep a reasonable phonetic transliteration.
+`
+,
         },
         {
           role: "user",
