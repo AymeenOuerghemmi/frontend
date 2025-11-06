@@ -228,8 +228,9 @@ export default function PatientWelcome() {
         </div>
 
         {/* IMAGES EN LIGNE SANS SCROLL */}
-<div className="w-full flex justify-center mt-6">
-  <div className="flex flex-row flex-wrap justify-center items-center gap-4 max-w-6xl">
+{/* IMAGES EN LIGNE SANS SCROLL, HAUTEUR AUGMENTÉE */}
+<div className="w-full flex justify-center mt-10"> 
+  <div className="flex flex-row flex-wrap justify-center items-center gap-6 max-w-7xl">
     {serviceImages.map((img, i) => (
       <a
         key={i}
@@ -240,17 +241,18 @@ export default function PatientWelcome() {
       >
         <img
           src={img.src}
-          className="rounded-xl shadow-md object-cover transition-transform hover:scale-105"
+          className="rounded-2xl shadow-lg object-cover transition-transform hover:scale-[1.06]"
           style={{
-            width: "200px",   // même largeur pour toutes
-            height: "140px",  // même hauteur pour toutes
-            borderRadius: "14px",
+            width: "260px",   // largeur augmentée
+            height: "220px",  // ✅ hauteur augmentée ici
+            borderRadius: "18px",
           }}
         />
       </a>
     ))}
   </div>
 </div>
+
 
       </div>
 
