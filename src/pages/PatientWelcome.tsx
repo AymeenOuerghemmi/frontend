@@ -243,8 +243,8 @@ export default function PatientWelcome() {
           src={img.src}
           className="rounded-2xl shadow-lg object-cover transition-transform hover:scale-[1.06]"
           style={{
-            width: "210px",   // largeur augmentée
-            height: "190px",  // ✅ hauteur augmentée ici
+            width: "288px",   // largeur augmentée
+            height: "240px",  // ✅ hauteur augmentée ici
             borderRadius: "18px",
           }}
         />
