@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "../components/ui/GlassCard";
 import { GradientText } from "../components/ui/GradientText";
 import { translateTextGroup } from "../services/translateService";
@@ -7,6 +8,7 @@ import { translateTextGroup } from "../services/translateService";
 export default function PatientWelcome() {
   const { nbsalle, idpatient } = useParams();
   const [data, setData] = useState<any>(null);
+  const [index, setIndex] = useState(0);
   const [time, setTime] = useState(new Date());
   const [lang, setLang] = useState<"fr" | "en" | "ar">("fr");
   const [translatedTexts, setTranslatedTexts] = useState<Record<string, any>>({});
@@ -20,6 +22,7 @@ export default function PatientWelcome() {
     "Nos experts s’occupent du reste 💜",
   ];
 
+  // Récupération API
   const loadData = async () => {
     if (!nbsalle || !idpatient) return;
     try {
@@ -42,9 +45,16 @@ export default function PatientWelcome() {
     return () => clearInterval(interval);
   }, [nbsalle, idpatient]);
 
+  // Horloge
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Défilement messages
+  useEffect(() => {
+    const interval = setInterval(() => setIndex((i) => (i + 1) % messages.length), 4000);
+    return () => clearInterval(interval);
   }, []);
 
   const person = data?.person || {};
@@ -80,7 +90,8 @@ export default function PatientWelcome() {
         if (result.messages)
           result.messages = result.messages.split(" || ").map((m: string) => m.trim());
         setTranslatedTexts(result);
-      } catch {
+      } catch (e) {
+        console.error("Erreur traduction:", e);
         setTranslatedTexts(baseTexts);
       }
     };
@@ -95,12 +106,13 @@ export default function PatientWelcome() {
 
   const welcomeText = `${translatedTexts.welcomeTitle || baseTexts.welcomeTitle} ${finalPatientName}`.trim();
 
+  // --- IMAGES affichées en ligne + cliquables
   const serviceImages = [
-    { src: "/images/IMG-20251106-WA0001.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-mammaire" },
-    { src: "/images/IMG-20251106-WA0002.jpg", alt: "Centre de Laser", url: "https://www.clinique-didon.com/content/laser-vasculaire" },
-    { src: "/images/IMG-20251106-WA0003.jpg", alt: "Médecine esthétique", url: "https://www.clinique-didon.com/content/botox" },
-    { src: "/images/IMG-20251106-WA0004.jpg", alt: "Greffe Capillaire", url: "https://www.clinique-didon.com/content/greffe-de-cheveux" },
-    { src: "/images/IMG-20251106-WA0005.jpg", alt: "Rééducation & Santé", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+    { src: "/images/IMG-20251106-WA0001.jpg", url: "https://www.clinique-didon.com/content/lifting-mammaire" },
+    { src: "/images/IMG-20251106-WA0002.jpg", url: "https://www.clinique-didon.com/content/laser-vasculaire" },
+    { src: "/images/IMG-20251106-WA0003.jpg", url: "https://www.clinique-didon.com/content/botox" },
+    { src: "/images/IMG-20251106-WA0004.jpg", url: "https://www.clinique-didon.com/content/greffe-de-cheveux" },
+    { src: "/images/IMG-20251106-WA0005.jpg", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
   ];
 
   if (!data)
@@ -110,20 +122,27 @@ export default function PatientWelcome() {
       </div>
     );
 
-  const msgs = translatedTexts.messages || messages;
+  const msgs =
+    Array.isArray(translatedTexts.messages) && translatedTexts.messages.length
+      ? translatedTexts.messages
+      : messages;
 
   return (
-    <div className={`relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-[#f9f7f3] ${lang === "ar" ? "direction-rtl text-right" : ""}`}>
-      
+    <div
+      className={`relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-[#f9f7f3] ${
+        lang === "ar" ? "direction-rtl text-right" : ""
+      }`}
+    >
+      {/* HEADER */}
       <header className="fixed top-0 left-0 w-full flex items-center justify-between px-10 py-1 bg-black/90 backdrop-blur-md border-b border-white/10 z-30 shadow-md">
         <img src="/logo-Didon.png" alt="Didon Clinic" className="w-16 h-16 object-contain" />
-
         <div className="text-center leading-tight">
           <h1 className="text-[#E5C89D] text-3xl md:text-4xl font-semibold uppercase drop-shadow-sm">
             {translatedTexts.clinicName || baseTexts.clinicName}
           </h1>
         </div>
 
+        {/* Heure + langues */}
         <div className="flex items-center gap-3 text-[#E5C89D]">
           <div className="text-right leading-tight">
             <div className="text-sm font-medium">
@@ -139,8 +158,10 @@ export default function PatientWelcome() {
               <button
                 key={lng}
                 onClick={() => setLang(lng as any)}
-                className={`w-7 h-7 flex items-center justify-center text-[10px] font-bold rounded-full ${
-                  lang === lng ? "bg-[#E5C89D] text-black" : "text-[#E5C89D]"
+                className={`w-7 h-7 flex items-center justify-center text-[10px] font-bold rounded-full transition-all ${
+                  lang === lng
+                    ? "bg-[#E5C89D] text-black shadow-sm"
+                    : "text-[#E5C89D] hover:bg-[#E5C89D]/30"
                 }`}
               >
                 {lng.toUpperCase()}
@@ -150,15 +171,24 @@ export default function PatientWelcome() {
         </div>
       </header>
 
+      {/* CONTENU */}
       <div className="flex flex-col items-center justify-center flex-grow mt-24 w-full px-2">
         <GlassCard className="relative z-10 p-10 md:p-9 w-[95%] max-w-7xl shadow-2xl rounded-3xl border border-white/40 overflow-hidden">
           <div
             className="absolute inset-0 rounded-3xl"
-            style={{ backgroundImage: `url('/didon-background.png')`, backgroundSize: "cover", backgroundPosition: "center" }}
+            style={{
+              backgroundImage: `url('/didon-background.png')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           />
           <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-3xl" />
-
-          <div className="relative z-10 text-center space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="relative z-10 text-center space-y-6"
+          >
             <GradientText from="#50301aff" to="#8b4513" className="text-4xl md:text-5xl font-bold">
               {welcomeText}
             </GradientText>
@@ -167,16 +197,26 @@ export default function PatientWelcome() {
               {translatedTexts.subText || baseTexts.subText}
             </p>
 
-            <p className="text-2xl md:text-3xl text-[#3E2E18] font-semibold mt-8">
-              {msgs[0]}
-            </p>
+            <div className="overflow-hidden relative mt-10 mb-6 h-16 flex justify-center items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={index}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  className="absolute text-2xl md:text-3xl text-[#3E2E18] font-semibold drop-shadow-sm"
+                >
+                  {msgs[index]}
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
             <p className="text-[#4b281b] leading-relaxed max-w-2xl mx-auto mt-6 text-base">
               {translatedTexts.description || baseTexts.description}
             </p>
-          </div>
+          </motion.div>
         </GlassCard>
 
+        {/* Séparateur */}
         <div className="w-full py-3 flex items-center justify-center">
           <div className="flex items-center justify-center gap-4 w-full max-w-4xl px-4">
             <div className="flex-1 h-[2px] bg-gradient-to-r from-transparent via-[#d4b896] to-transparent max-w-[400px]" />
@@ -187,21 +227,26 @@ export default function PatientWelcome() {
           </div>
         </div>
 
-        {/* IMAGES CLIQUABLES */}
-        <div className="w-full max-w-6xl grid grid-cols-2 md:grid-cols-3 gap-6 mt-10 px-4">
+        {/* IMAGES EN LIGNE */}
+        <div className="flex flex-row justify-center items-center gap-4 mt-6 overflow-x-auto px-2 w-full max-w-6xl">
           {serviceImages.map((img, i) => (
-            <a key={i} href={img.url} target="_blank" rel="noopener noreferrer" className="block">
+            <a
+              key={i}
+              href={img.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0"
+            >
               <img
                 src={img.src}
-                alt={img.alt}
-                className="w-full h-48 object-cover rounded-xl shadow-md border border-[#e5c89d]/40 transition"
+                className="h-40 w-auto rounded-xl shadow-md object-cover cursor-pointer hover:scale-105 transition-transform"
               />
-              <p className="text-center text-[#50301a] mt-2 text-sm font-medium">{img.alt}</p>
             </a>
           ))}
         </div>
       </div>
 
+      {/* FOOTER */}
       <footer className="w-full py-3 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-3 text-center mt-10">
         <img
           src="https://softsys.com.tn/wp-content/uploads/2018/02/LOGOSOFTSYS.png"
