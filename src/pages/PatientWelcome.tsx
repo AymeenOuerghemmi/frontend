@@ -243,7 +243,7 @@ export default function PatientWelcome() {
           src={img.src}
           className="rounded-2xl shadow-lg object-cover transition-transform hover:scale-[1.06]"
           style={{
-            width: "200px",   // largeur augmentée
+            width: "230px",   // largeur augmentée
             height: "200px",  // ✅ hauteur augmentée ici
             borderRadius: "18px",
           }}
@@ -252,7 +252,7 @@ export default function PatientWelcome() {
     ))}
   </div>
 </div>
-
+<div className="w-full flex justify-center mt-5"></div>
 
       </div>
 
