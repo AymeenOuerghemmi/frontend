@@ -1,15 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "../components/ui/GlassCard";
 import { GradientText } from "../components/ui/GradientText";
-import ServiceLoop from "../components/ServiceLoop";
 import { translateTextGroup } from "../services/translateService";
 
 export default function PatientWelcome() {
   const { nbsalle, idpatient } = useParams();
   const [data, setData] = useState<any>(null);
-  const [index, setIndex] = useState(0);
   const [time, setTime] = useState(new Date());
   const [lang, setLang] = useState<"fr" | "en" | "ar">("fr");
   const [translatedTexts, setTranslatedTexts] = useState<Record<string, any>>({});
@@ -23,7 +20,6 @@ export default function PatientWelcome() {
     "Nos experts s’occupent du reste 💜",
   ];
 
-  // --- Récupération des données patient
   const loadData = async () => {
     if (!nbsalle || !idpatient) return;
     try {
@@ -46,19 +42,11 @@ export default function PatientWelcome() {
     return () => clearInterval(interval);
   }, [nbsalle, idpatient]);
 
-  // --- Horloge
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // --- Défilement des messages
-  useEffect(() => {
-    const interval = setInterval(() => setIndex((i) => (i + 1) % messages.length), 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // --- Textes à traduire
   const person = data?.person || {};
   const rawPatientName = (data?.success ? `${person?.prenom || ""} ${person?.nom || ""}` : "").trim();
 
@@ -81,7 +69,6 @@ export default function PatientWelcome() {
     messages: messages.join(" || "),
   };
 
-  // --- Traduction GPT groupée
   useEffect(() => {
     const translateAll = async () => {
       if (lang === "fr") {
@@ -93,49 +80,27 @@ export default function PatientWelcome() {
         if (result.messages)
           result.messages = result.messages.split(" || ").map((m: string) => m.trim());
         setTranslatedTexts(result);
-      } catch (e) {
-        console.error("Erreur traduction:", e);
+      } catch {
         setTranslatedTexts(baseTexts);
       }
     };
     translateAll();
   }, [lang, data]);
 
-  // --- Sécurité : si la traduction du nom arabe reste en latin → garder original
   const looksLatin = (s: string) => /^[\u0000-\u00ff\s'.-]+$/.test(s);
   const finalPatientName =
     lang === "ar" && looksLatin(translatedTexts.patientName)
       ? baseTexts.patientName
       : (translatedTexts.patientName || baseTexts.patientName);
 
-  // --- Construction du titre final
   const welcomeText = `${translatedTexts.welcomeTitle || baseTexts.welcomeTitle} ${finalPatientName}`.trim();
 
-  // --- Images fixes
-   const serviceImages = [
-    { src: "/images/2-technique-botox-1.jpg", alt: "Bien-être & Soins", url: "https://www.clinique-didon.com/content/botox" },
-    { src: "/images/1617917820-8ff0e3a4-e410-4de1-bede-f6b9f0765d60-1024x615.jpg", alt: "Rééducation & Santé", url: "https://www.clinique-didon.com/content/hydrafacial" },
-    { src: "/images/C1_5035.jpg", alt: "Centre de Laser", url: "https://www.clinique-didon.com/content/morpheus8" },
-    { src: "/images/Capture d’écran 2025-09-29 à 14.37.32.png", alt: "Greffe Capillaire", url: "https://www.clinique-didon.com/content/reduction-mammaire" },
-    { src: "/images/Capture d’écran 2025-09-29 à 15.24.22.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-mammaire" },
-    { src: "/images/Capture d’écran 2025-09-29 à 16.30.48.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-cervico-facial" },
-    { src: "/images/Capture d’écran 2025-09-29 à 17.27.15.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/blepharoplastie" },
-    { src: "/images/Capture d’écran 2025-10-01 à 18.07.22.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/reeducation" },
-    { src: "/images/Capture d’écran 2025-10-01 à 18.29.29.png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/complements-de-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/image (8).png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/jeune-couple-se-detendre-pendant-le-massage-du-dos-au-spa-de-sante-l-accent-est-mis-sur-la-jeune-femme.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/jeune-femme-se-detendre-dans-le-salon-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/jolie-femme-africaine-beneficiant-d-un-massage-du-visage-dans-le-salon-spa.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/La-Luminotherapie-LED-Medisol.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/led-therapie" },
-    { src: "/images/lipo_1.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/amincissement" },
-    { src: "/images/liposuccion-vaser.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/liposuccion" },
-    { src: "/images/male-adulte-faisant-une-extraction-d-unite-folliculaire.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/greffe-de-cheveux" },
-    { src: "/images/maquillage-permanent-pour-sourcils-gros-plan-belle-femme-aux-sourcils-epais-dans-salon-beaute_358354-9083.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/greffe-des-sourcils" },
-    { src: "/images/medecin-orl-touche-nez.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/rhinoplastie" },
-    { src: "/images/peeling-dr-pecorelli-chirurgie-plastique-et-medecine-esthetique-paris.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/peeling" },
-    { src: "/images/silhouette-de-femme-en-spa (1).jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
-    { src: "/images/Site Web (1).png", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
+  const serviceImages = [
+    { src: "/images/IMG-20251106-WA0001.jpg", alt: "Chirurgie Esthétique", url: "https://www.clinique-didon.com/content/lifting-mammaire" },
+    { src: "/images/IMG-20251106-WA0002.jpg", alt: "Centre de Laser", url: "https://www.clinique-didon.com/content/laser-vasculaire" },
+    { src: "/images/IMG-20251106-WA0003.jpg", alt: "Médecine esthétique", url: "https://www.clinique-didon.com/content/botox" },
+    { src: "/images/IMG-20251106-WA0004.jpg", alt: "Greffe Capillaire", url: "https://www.clinique-didon.com/content/greffe-de-cheveux" },
+    { src: "/images/IMG-20251106-WA0005.jpg", alt: "Rééducation & Santé", url: "https://www.clinique-didon.com/content/bien-etre-et-soin" },
   ];
 
   if (!data)
@@ -145,27 +110,20 @@ export default function PatientWelcome() {
       </div>
     );
 
-  const msgs =
-    Array.isArray(translatedTexts.messages) && translatedTexts.messages.length
-      ? translatedTexts.messages
-      : messages;
+  const msgs = translatedTexts.messages || messages;
 
   return (
-    <div
-      className={`relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-[#f9f7f3] ${
-        lang === "ar" ? "direction-rtl text-right" : ""
-      }`}
-    >
-      {/* HEADER */}
+    <div className={`relative min-h-screen flex flex-col items-center overflow-hidden font-[Times_New_Roman] bg-[#f9f7f3] ${lang === "ar" ? "direction-rtl text-right" : ""}`}>
+      
       <header className="fixed top-0 left-0 w-full flex items-center justify-between px-10 py-1 bg-black/90 backdrop-blur-md border-b border-white/10 z-30 shadow-md">
         <img src="/logo-Didon.png" alt="Didon Clinic" className="w-16 h-16 object-contain" />
+
         <div className="text-center leading-tight">
           <h1 className="text-[#E5C89D] text-3xl md:text-4xl font-semibold uppercase drop-shadow-sm">
             {translatedTexts.clinicName || baseTexts.clinicName}
           </h1>
         </div>
 
-        {/* Heure + langues */}
         <div className="flex items-center gap-3 text-[#E5C89D]">
           <div className="text-right leading-tight">
             <div className="text-sm font-medium">
@@ -181,10 +139,8 @@ export default function PatientWelcome() {
               <button
                 key={lng}
                 onClick={() => setLang(lng as any)}
-                className={`w-7 h-7 flex items-center justify-center text-[10px] font-bold rounded-full transition-all ${
-                  lang === lng
-                    ? "bg-[#E5C89D] text-black shadow-sm"
-                    : "text-[#E5C89D] hover:bg-[#E5C89D]/30"
+                className={`w-7 h-7 flex items-center justify-center text-[10px] font-bold rounded-full ${
+                  lang === lng ? "bg-[#E5C89D] text-black" : "text-[#E5C89D]"
                 }`}
               >
                 {lng.toUpperCase()}
@@ -194,24 +150,15 @@ export default function PatientWelcome() {
         </div>
       </header>
 
-      {/* CONTENU */}
       <div className="flex flex-col items-center justify-center flex-grow mt-24 w-full px-2">
         <GlassCard className="relative z-10 p-10 md:p-9 w-[95%] max-w-7xl shadow-2xl rounded-3xl border border-white/40 overflow-hidden">
-         <div
+          <div
             className="absolute inset-0 rounded-3xl"
-            style={{
-              backgroundImage: `url('/didon-background.png')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
+            style={{ backgroundImage: `url('/didon-background.png')`, backgroundSize: "cover", backgroundPosition: "center" }}
           />
           <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-3xl" />
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="relative z-10 text-center space-y-6"
-          >
+
+          <div className="relative z-10 text-center space-y-6">
             <GradientText from="#50301aff" to="#8b4513" className="text-4xl md:text-5xl font-bold">
               {welcomeText}
             </GradientText>
@@ -220,23 +167,14 @@ export default function PatientWelcome() {
               {translatedTexts.subText || baseTexts.subText}
             </p>
 
-            <div className="overflow-hidden relative mt-10 mb-6 h-16 flex justify-center items-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={index}
-                  initial={{ y: "100%", opacity: 0 }}
-                  animate={{ y: "0%", opacity: 1 }}
-                  className="absolute text-2xl md:text-3xl text-[#3E2E18] font-semibold drop-shadow-sm"
-                >
-                  {msgs[index]}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+            <p className="text-2xl md:text-3xl text-[#3E2E18] font-semibold mt-8">
+              {msgs[0]}
+            </p>
 
             <p className="text-[#4b281b] leading-relaxed max-w-2xl mx-auto mt-6 text-base">
               {translatedTexts.description || baseTexts.description}
             </p>
-          </motion.div>
+          </div>
         </GlassCard>
 
         <div className="w-full py-3 flex items-center justify-center">
@@ -249,10 +187,21 @@ export default function PatientWelcome() {
           </div>
         </div>
 
-        <ServiceLoop images={serviceImages} speed={40} />
+        {/* IMAGES CLIQUABLES */}
+        <div className="w-full max-w-6xl grid grid-cols-2 md:grid-cols-3 gap-6 mt-10 px-4">
+          {serviceImages.map((img, i) => (
+            <a key={i} href={img.url} target="_blank" rel="noopener noreferrer" className="block">
+              <img
+                src={img.src}
+                alt={img.alt}
+                className="w-full h-48 object-cover rounded-xl shadow-md border border-[#e5c89d]/40 transition"
+              />
+              <p className="text-center text-[#50301a] mt-2 text-sm font-medium">{img.alt}</p>
+            </a>
+          ))}
+        </div>
       </div>
 
-      {/* FOOTER */}
       <footer className="w-full py-3 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-3 text-center mt-10">
         <img
           src="https://softsys.com.tn/wp-content/uploads/2018/02/LOGOSOFTSYS.png"
